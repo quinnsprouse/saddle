@@ -1,0 +1,10 @@
+{
+  "tolerances": {
+    "relative": 0.1,
+    "floors": {
+      "s": 0.01,
+      "ms per s": 1,
+      "%": 0.5
+    }
+  }
+}

@@ -1,0 +1,9 @@
+#!/bin/sh
+set -eu
+cd "$(git rev-parse --show-toplevel)"
+staged=$(git diff --cached --name-only --diff-filter=ACMR -- '*.swift')
+[ -z "$staged" ] && exit 0
+printf '%s\n' "$staged" | tr '\n' '\0' | xargs -0 xcrun swift-format lint --strict || {
+  echo "Format the staged files with mise run fmt, then stage them again." >&2
+  exit 1
+}

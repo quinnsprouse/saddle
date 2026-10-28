@@ -1,0 +1,15 @@
+#!/bin/sh
+set -eu
+header=$(sed -n '/^[^#]/{p;q;}' "$1")
+if ! printf '%s\n' "$header" | grep -Eq '^((Merge|fixup!|squash!|amend!) .+|(build|chore|ci|docs|feat|fix|perf|refactor|revert|style|test)(\([a-z0-9._/-]+\))?!?: .+)$'; then
+  echo "Use Conventional Commits: type(scope): description" >&2
+  exit 1
+fi
+if [ "${#header}" -gt 100 ]; then
+  echo "Keep the commit header to 100 characters." >&2
+  exit 1
+fi
+if grep -iq '^co-authored-by:' "$1"; then
+  echo "Drop the Co-Authored-By trailer." >&2
+  exit 1
+fi

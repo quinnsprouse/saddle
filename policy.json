@@ -1,0 +1,27 @@
+{
+  "allow": [
+    {
+      "rule": "world-access",
+      "paths": [
+        "Packages/Core/Sources/Services/",
+        "Packages/Core/Tests/",
+        "App/Sources/",
+        "App/UITests/",
+        "App/PerformanceTests/",
+        "App/TestSupport/",
+        "Tools/"
+      ],
+      "why": "Services and the composition root own the outside world, and tests and tools create temporary files."
+    },
+    {
+      "rule": "print",
+      "paths": ["Tools/Sources/policy/"],
+      "why": "The policy command reports its violations on standard output for scripts and agents."
+    },
+    {
+      "rule": "design-token",
+      "paths": ["Packages/UI/Sources/DesignSystem/"],
+      "why": "The design system defines the raw colors and type sizes that screens reference by token."
+    }
+  ]
+}

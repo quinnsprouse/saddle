@@ -1,0 +1,45 @@
+[tools]
+node = "24.20.0"
+tuist = "4.214.0"
+swiftlint = "0.65.1"
+periphery = "3.8.0"
+
+[tasks.setup]
+description = "Install the Git hooks and generate the Xcode workspace"
+run = "node scripts/setup.mjs"
+
+[tasks.generate]
+description = "Regenerate the Xcode workspace from Project.swift"
+run = "tuist generate --no-open"
+
+[tasks.dev]
+description = "Build, install, and launch the app on the pinned simulator"
+run = "node scripts/dev.mjs"
+
+[tasks.check]
+description = "Format, lint, policy, contracts, package tests, and the simulator build"
+run = "node scripts/verify.mjs fast"
+
+[tasks."check:push"]
+description = "check plus the release build, UI journeys, dead code, dependencies, and Thread Sanitizer"
+run = "node scripts/verify.mjs push"
+
+[tasks."check:ci"]
+description = "check:push plus the template contract on a fresh copy of the staged files"
+run = "node scripts/verify.mjs ci"
+
+[tasks.rename]
+description = "Rename the app and its bundle identifier: mise run rename -- <AppName> <bundle.id>"
+run = "node scripts/rename.mjs"
+
+[tasks.perf]
+description = "Measure launch, scroll, and search in Release: mise run perf -- [--save NAME] [--compare NAME] [--device UDID --team ID]"
+run = "node scripts/perf.mjs"
+
+[tasks.fmt]
+description = "Format Swift files and apply SwiftLint autocorrections"
+run = "node scripts/fmt.mjs"
+
+[tasks.doctor]
+description = "Check the toolchain and workspace, with a fix for each problem"
+run = "node scripts/doctor.mjs"

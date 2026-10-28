@@ -1,0 +1,18 @@
+{
+  "hooks": {
+    "SessionStart": [{
+      "hooks": [{ "type": "command", "command": "node \"$(git rev-parse --show-toplevel)/.agents/hooks/session-start.mjs\"", "timeout": 30 }]
+    }],
+    "PreToolUse": [{
+      "matcher": "Bash|exec_command|apply_patch|Edit|Write",
+      "hooks": [{ "type": "command", "command": "node \"$(git rev-parse --show-toplevel)/.agents/hooks/guard.mjs\" --codex", "timeout": 10 }]
+    }],
+    "PostToolUse": [{
+      "matcher": "apply_patch|Edit|Write",
+      "hooks": [{ "type": "command", "command": "node \"$(git rev-parse --show-toplevel)/.agents/hooks/post-edit.mjs\"", "timeout": 60 }]
+    }],
+    "Stop": [{
+      "hooks": [{ "type": "command", "command": "node \"$(git rev-parse --show-toplevel)/.agents/hooks/stop.mjs\"", "timeout": 300 }]
+    }]
+  }
+}

@@ -1,0 +1,98 @@
+strict: true
+excluded:
+  - .build
+  - .scratch
+  - Derived
+  - Packages/*/.build
+  - Tools/.build
+
+disabled_rules:
+  - opening_brace
+  - trailing_comma
+  - todo
+
+opt_in_rules:
+  - accessibility_label_for_image
+  - accessibility_trait_for_button
+  - array_init
+  - async_without_await
+  - closure_body_length
+  - collection_alignment
+  - contains_over_filter_count
+  - contains_over_filter_is_empty
+  - contains_over_first_not_nil
+  - contains_over_range_nil_comparison
+  - convenience_type
+  - direct_return
+  - discarded_notification_center_observer
+  - discouraged_assert
+  - discouraged_none_name
+  - discouraged_object_literal
+  - discouraged_optional_boolean
+  - empty_collection_literal
+  - empty_count
+  - empty_string
+  - enum_case_associated_values_count
+  - explicit_init
+  - fallthrough
+  - fatal_error_message
+  - final_test_case
+  - first_where
+  - flatmap_over_map_reduce
+  - force_unwrapping
+  - identical_operands
+  - implicitly_unwrapped_optional
+  - joined_default_parameter
+  - last_where
+  - legacy_multiple
+  - legacy_objc_type
+  - lower_acl_than_parent
+  - nslocalizedstring_key
+  - overridden_super_call
+  - prefer_key_path
+  - prefer_self_in_static_references
+  - prefer_self_type_over_type_of_self
+  - prefer_zero_over_explicit_init
+  - private_swiftui_state
+  - prohibited_super_call
+  - reduce_into
+  - redundant_nil_coalescing
+  - redundant_type_annotation
+  - return_value_from_void_function
+  - self_binding
+  - shorthand_optional_binding
+  - sorted_first_last
+  - static_operator
+  - superfluous_else
+  - test_case_accessibility
+  - toggle_bool
+  - unavailable_function
+  - unhandled_throwing_task
+  - unneeded_parentheses_in_closure_argument
+  - unowned_variable_capture
+  - untyped_error_in_catch
+  - weak_delegate
+  - xct_specific_matcher
+  - yoda_condition
+
+line_length:
+  warning: 120
+  ignores_urls: true
+file_length:
+  warning: 300
+function_body_length:
+  warning: 40
+type_body_length:
+  warning: 200
+closure_body_length:
+  warning: 30
+cyclomatic_complexity:
+  warning: 10
+nesting:
+  type_level: 2
+function_parameter_count:
+  warning: 5
+large_tuple:
+  warning: 2
+identifier_name:
+  excluded: [id, x, y]
