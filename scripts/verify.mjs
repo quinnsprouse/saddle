@@ -111,20 +111,25 @@ const push = [
       ),
   },
   {
-    name: "journeys",
+    name: "simulator",
     needs: "sanitized build",
+    run: () => {
+      const device = simulator();
+      capture("xcrun", ["simctl", "boot", device]);
+      return capture("xcrun", ["simctl", "bootstatus", device, "-b"]);
+    },
+  },
+  {
+    name: "journeys",
+    needs: "simulator",
     run: () => {
       const bundle = resolve(root, ".scratch/results/ui.xcresult");
       rmSync(bundle, { recursive: true, force: true });
-      const device = simulator();
-      capture("xcrun", ["simctl", "boot", device]);
-      const booted = capture("xcrun", ["simctl", "bootstatus", device, "-b"]);
-      if (!booted.ok) return booted;
       const result = xcodebuildIn(
         sanitizedData,
         "test-without-building",
         "-destination",
-        `id=${device}`,
+        `id=${simulator()}`,
         "-enableThreadSanitizer",
         "YES",
         "-only-testing:UITests",
@@ -167,7 +172,7 @@ const ci = [{ name: "template", run: () => capture("node", ["scripts/template.mj
 const everything = [...fast, ...push, ...ci];
 const lane = (names) => everything.filter((step) => names.includes(step.name));
 const builds = lane(["generate", "build", "release build", "analyze", "dead code", "dependencies"]);
-const journeys = lane(["generate", "sanitized build", "journeys"]);
+const journeys = lane(["generate", "sanitized build", "simulator", "journeys"]);
 const laned = new Set([...builds, ...journeys, ...ci].map((step) => step.name));
 const tiers = {
   fast,
