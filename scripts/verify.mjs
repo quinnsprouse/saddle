@@ -1,4 +1,3 @@
-import { spawn } from "node:child_process";
 import { rmSync } from "node:fs";
 import { relative, resolve } from "node:path";
 import { capture, derivedData, identity, root, simulator, swiftFiles, workspace, writeLog } from "./lib.mjs";
@@ -104,10 +103,11 @@ const push = [
         sanitizedData,
         "build-for-testing",
         "-destination",
-        "generic/platform=iOS Simulator",
+        `id=${simulator()}`,
         "-enableThreadSanitizer",
         "YES",
         "ENABLE_THREAD_SANITIZER=YES",
+        "COMPILER_INDEX_STORE_ENABLE=NO",
       ),
   },
   {
@@ -179,16 +179,6 @@ const tiers = {
   "ci-template": ci,
 };
 
-function bootSimulatorEarly() {
-  let device;
-  try {
-    device = simulator();
-  } catch {
-    return;
-  }
-  spawn("xcrun", ["simctl", "boot", device], { stdio: "ignore", detached: true }).unref();
-}
-
 function diagnostics(output) {
   const text = output.replaceAll(`${root}/`, "");
   const lines = text.split("\n");
@@ -212,8 +202,6 @@ if (steps === undefined) {
   console.error(`usage: node scripts/verify.mjs <${Object.keys(tiers).join("|")}>`);
   process.exit(64);
 }
-
-if (steps.some((step) => step.name === "journeys")) bootSimulatorEarly();
 
 const started = Date.now();
 const failed = new Set();
