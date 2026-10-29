@@ -1,3 +1,4 @@
+import { spawn } from "node:child_process";
 import { rmSync } from "node:fs";
 import { relative, resolve } from "node:path";
 import { capture, derivedData, identity, root, simulator, swiftFiles, workspace, writeLog } from "./lib.mjs";
@@ -163,7 +164,30 @@ const push = [
 
 const ci = [{ name: "template", run: () => capture("node", ["scripts/template.mjs"]) }];
 
-const tiers = { fast, push: [...fast, ...push], ci: [...fast, ...push, ...ci] };
+const everything = [...fast, ...push, ...ci];
+const lane = (names) => everything.filter((step) => names.includes(step.name));
+const builds = lane(["generate", "build", "release build", "analyze", "dead code", "dependencies"]);
+const journeys = lane(["generate", "sanitized build", "journeys"]);
+const laned = new Set([...builds, ...journeys, ...ci].map((step) => step.name));
+const tiers = {
+  fast,
+  push: [...fast, ...push],
+  ci: everything,
+  "ci-static": everything.filter((step) => !laned.has(step.name)),
+  "ci-build": builds,
+  "ci-journeys": journeys,
+  "ci-template": ci,
+};
+
+function bootSimulatorEarly() {
+  let device;
+  try {
+    device = simulator();
+  } catch {
+    return;
+  }
+  spawn("xcrun", ["simctl", "boot", device], { stdio: "ignore", detached: true }).unref();
+}
 
 function diagnostics(output) {
   const text = output.replaceAll(`${root}/`, "");
@@ -188,6 +212,8 @@ if (steps === undefined) {
   console.error(`usage: node scripts/verify.mjs <${Object.keys(tiers).join("|")}>`);
   process.exit(64);
 }
+
+if (steps.some((step) => step.name === "journeys")) bootSimulatorEarly();
 
 const started = Date.now();
 const failed = new Set();

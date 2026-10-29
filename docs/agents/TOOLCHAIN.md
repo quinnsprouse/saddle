@@ -37,4 +37,8 @@ Git pins the skills: `.agents/skills/` holds the committed files for `swiftui-pr
 
 ## CI
 
-`.github/workflows/ci.yml` runs `mise run check:ci` with the Xcode from `toolchain.json`, on GitHub's `xcode-27` runner. That image is a preview, but GitHub's generally available `macos-26` image doesn't include Xcode 27. Move `runs-on` to a generally available label once one includes Xcode 27. Each action is pinned to a commit SHA, and Dependabot updates the actions and swift-syntax. macOS runner minutes cost several times Linux minutes, so run `check:push` locally and let CI confirm.
+`.github/workflows/ci.yml` runs the `check:ci` steps with the Xcode from `toolchain.json`, on GitHub's `xcode-27` runner. That image is a preview, but GitHub's generally available `macos-26` image doesn't include Xcode 27. Move `runs-on` to a generally available label once one includes Xcode 27.
+
+The workflow splits the steps into four parallel lanes, `node scripts/verify.mjs ci-static`, `ci-build`, `ci-journeys`, and `ci-template`, so a run takes as long as its slowest lane. `ci-static` holds every step the other lanes don't, so a new step can't fall out of CI. When a run includes the journeys, the simulator starts booting at the beginning, while the build runs.
+
+Each action is pinned to a commit SHA, and Dependabot updates the actions and swift-syntax. In a private repository, macOS minutes cost several times Linux minutes, and each run uses four runners, so run `check:push` locally and let CI confirm.

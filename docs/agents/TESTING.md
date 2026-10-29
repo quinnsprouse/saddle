@@ -36,7 +36,7 @@ Cover failure paths through the app too. `testACorruptFavoritesFileShowsTheFailu
 | --- | --- | --- |
 | `mise run check` | doctor, contract, hook tests, comments, theme reference, swift-format, SwiftLint, policy, policy tests, import check, generate, simulator build | you, and the Stop hook |
 | `mise run check:push` | Release build, SwiftLint analyzer, journeys and audits under Thread Sanitizer, Periphery, `tuist inspect dependencies` | the pre-push hook |
-| `mise run check:ci` | the template contract on a fresh copy of the staged files, including a rename | CI |
+| `mise run check:ci` | the template contract on a fresh copy of the staged files, including a rename | CI, in four parallel lanes |
 
 Each tier keeps going after a failure. It skips only the steps that depend on a failed one, such as the build after a failed generate. It prints one line per diagnostic and writes the full output to `.scratch/logs/`.
 

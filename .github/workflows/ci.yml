@@ -14,8 +14,13 @@ concurrency:
 
 jobs:
   verify:
+    name: ${{ matrix.lane }}
     runs-on: xcode-27
-    timeout-minutes: 45
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        lane: [static, build, journeys, template]
     env:
       MISE_TRUSTED_CONFIG_PATHS: ${{ github.workspace }}
     steps:
@@ -25,16 +30,17 @@ jobs:
       - name: Select the pinned Xcode
         run: sudo xcode-select -s "/Applications/Xcode_$(jq -r .xcode toolchain.json).app"
       - uses: jdx/mise-action@6be3c7ed4c21d4f76b208d351d95aac273ebb76d # v5.2.4
-      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      - if: matrix.lane == 'static'
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: .build/spm
           key: spm-${{ runner.os }}-${{ hashFiles('toolchain.json', 'Tools/Package.resolved', '**/Package.swift') }}
-      - run: mise run check:ci
+      - run: mise exec -- node scripts/verify.mjs "ci-${{ matrix.lane }}"
       - name: Upload failure evidence
         if: failure()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: verify-${{ github.run_id }}
+          name: verify-${{ matrix.lane }}-${{ github.run_id }}
           path: |
             .scratch/logs
             .scratch/results
