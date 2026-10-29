@@ -128,6 +128,8 @@ const push = [
         "-only-testing:UITests",
         "-parallel-testing-enabled",
         "NO",
+        "-collect-test-diagnostics",
+        "never",
         "-resultBundlePath",
         bundle,
       );

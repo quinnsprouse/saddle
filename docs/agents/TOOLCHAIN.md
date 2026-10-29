@@ -2,7 +2,7 @@
 
 ## Pins
 
-- `toolchain.json` pins Xcode, Swift, the iOS deployment target, and the simulator. The doctor checks the installed Xcode and Swift against it, and the contract makes the iOS platform of each package in `Packages/` and `Identity.deploymentTarget` match its `ios` value.
+- `toolchain.json` pins Xcode, Swift, the iOS deployment target, and the simulator. The deployment target is iOS 27.0, because iOS 27.1 ships only for iPhone Duo, and other iPhones and iPads move from 27.0 to 27.2. The simulator is iPhone Duo, which only the iOS 27.1 runtime provides. The doctor checks the installed Xcode and Swift against it, and the contract makes the iOS platform of each package in `Packages/` and `Identity.deploymentTarget` match its `ios` value.
 - `mise.toml` pins Node, Tuist, SwiftLint, and Periphery, and defines the tasks. swift-format ships with Xcode.
 - `Tools/Package.resolved` pins swift-syntax. Remote packages use `exact:` versions.
 
@@ -12,8 +12,9 @@
 2. Update `xcode`, `swift`, and `ios` in `toolchain.json`.
 3. Set the same iOS version in each `Packages/*/Package.swift` and in `Tuist/ProjectDescriptionHelpers/Identity.swift`. `mise run check` names any file you missed.
 4. Move swift-syntax in `Tools/Package.swift` to the release for the new Swift, then run `swift package update --package-path Tools`.
-5. Run `mise run check:ci` and fix new diagnostics at their source.
-6. For Xcode 27.1 or later, run the journeys and a manual pass on the iPhone Duo simulator too. See [SwiftUI](SWIFTUI.md#adaptive-layout-and-iphone-duo).
+5. Run `xcrun swiftc -print-supported-features` and enable each new upcoming feature in the `strict` settings of every `Package.swift` and in `BuildSettings.swift`, then add it to `scripts/contract.mjs`. Swift 6.4 added `ImmutableWeakCaptures`, which has no Xcode build setting, so `BuildSettings.swift` passes it in `OTHER_SWIFT_FLAGS`.
+6. Run `mise run check:ci` and fix new diagnostics at their source. Right after an install, the asset catalog compiler can hang while macOS finishes setting up. If a build sits at CompileAssetCatalog for more than a minute, stop it, run `pkill -f AssetCatalogAgent; pkill -x ibtoold`, and run it again.
+7. Do a manual pass on the iPhone Duo simulator. See [SwiftUI](SWIFTUI.md#adaptive-layout-and-iphone-duo).
 
 ## Workspace
 
@@ -23,11 +24,11 @@ Tuist generates `<App>.xcworkspace` from `Project.swift` and `Tuist/ProjectDescr
 
 ## Simulator
 
-`mise run dev` builds Debug for the simulator named in `toolchain.json`, boots it, installs the app, and launches it. `--screenshot <path>` saves a screenshot after `--wait` seconds (default 3). `--open` shows Simulator.app.
+`mise run dev` builds Debug for the simulator named in `toolchain.json`, boots it, installs the app, and launches it. `--screenshot <path>` saves a screenshot after `--wait` seconds (default 3). `--open` shows Device Hub, which replaces Simulator.app in Xcode 27.1 and has the controls that open, fold, and rotate iPhone Duo. It opens the Device Hub inside the selected Xcode, because an older copy lacks those controls.
 
 ## Agent tools for Xcode
 
-- **XcodeBuildMCP**, pinned in `.mcp.json` and `.codex/config.toml`: build, run, tap, type, take screenshots, read the view hierarchy, and debug on the simulator.
+- **MobileBuildMCP** (formerly XcodeBuildMCP), pinned in `.mcp.json` and `.codex/config.toml`: build, run, tap, type, take screenshots, read the view hierarchy, and debug on the simulator.
 - **Xcode's MCP server**, in Xcode 26.3 and later: build logs, tests, previews, and Apple documentation from a running Xcode. Turn on Xcode > Settings > Intelligence > Xcode Tools, then run `claude mcp add xcode -- xcrun mcpbridge` or `codex mcp add xcode -- xcrun mcpbridge`.
 
 ## Skills
@@ -36,4 +37,4 @@ Git pins the skills: `.agents/skills/` holds the committed files for `swiftui-pr
 
 ## CI
 
-`.github/workflows/ci.yml` runs `mise run check:ci` on a macOS runner with the Xcode from `toolchain.json`. Each action is pinned to a commit SHA, and Dependabot updates the actions and swift-syntax. macOS runner minutes cost several times Linux minutes, so run `check:push` locally and let CI confirm.
+`.github/workflows/ci.yml` runs `mise run check:ci` with the Xcode from `toolchain.json`, on GitHub's `xcode-27` runner. That image is a preview, but GitHub's generally available `macos-26` image doesn't include Xcode 27. Move `runs-on` to a generally available label once one includes Xcode 27. Each action is pinned to a commit SHA, and Dependabot updates the actions and swift-syntax. macOS runner minutes cost several times Linux minutes, so run `check:push` locally and let CI confirm.

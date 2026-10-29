@@ -26,7 +26,7 @@ mise run dev
 - **End-to-end tests only.** XCUITest journeys with isolated storage, run under Thread Sanitizer, and accessibility audits for contrast, hit areas, labels, and Dynamic Type. App code has no unit tests.
 - **Performance by default.** Off-main-actor work with cancellation, signposts, MetricKit, and Periphery for dead code. `mise run perf` measures launch, scroll, and search in Release and compares against saved baselines.
 - **Adaptive layout.** `NavigationSplitView` and size classes, ready for iPad and iPhone Duo's two displays.
-- **Agent hooks** for Claude Code and Codex, shared in `.agents/hooks/`: a guard for risky edits and commands, formatting and lint after each edit, and a stop check that sends the agent back once when `check` fails. [XcodeBuildMCP](https://xcodebuildmcp.com) is configured for simulator control, and vetted SwiftUI and concurrency skills are committed in `.agents/skills/`.
+- **Agent hooks** for Claude Code and Codex, shared in `.agents/hooks/`: a guard for risky edits and commands, formatting and lint after each edit, and a stop check that sends the agent back once when `check` fails. [MobileBuildMCP](https://github.com/getsentry/MobileBuildMCP) is configured for simulator control, and vetted SwiftUI and concurrency skills are committed in `.agents/skills/`.
 
 ## Commands
 

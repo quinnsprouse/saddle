@@ -8,7 +8,9 @@ const upcomingFeatures = [
   "MemberImportVisibility",
   "NonisolatedNonsendingByDefault",
   "InferIsolatedConformances",
+  "ImmutableWeakCaptures",
 ];
+const featuresWithoutXcodeSetting = ["ImmutableWeakCaptures"];
 const mainActorPackages = new Set(["Packages/UI"]);
 const xcodeSettings = {
   SWIFT_VERSION: "6.0",
@@ -94,6 +96,11 @@ function checkXcodeSettings() {
     if (!helper.includes(`"${key}": "${value}"`)) {
       problems.push(`Tuist/ProjectDescriptionHelpers/BuildSettings.swift: strict must set "${key}": "${value}".`);
     }
+  }
+  for (const feature of featuresWithoutXcodeSetting.filter((name) => !helper.includes(`"-enable-upcoming-feature", "${name}"`))) {
+    problems.push(
+      `Tuist/ProjectDescriptionHelpers/BuildSettings.swift: add "-enable-upcoming-feature", "${feature}" to OTHER_SWIFT_FLAGS.`,
+    );
   }
   for (const flag of suppressionFlags.filter((name) => helper.includes(name))) {
     problems.push(`Tuist/ProjectDescriptionHelpers/BuildSettings.swift: remove ${flag}; fix the diagnostic instead.`);

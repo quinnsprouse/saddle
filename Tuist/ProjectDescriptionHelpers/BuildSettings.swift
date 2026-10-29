@@ -14,6 +14,7 @@ public enum BuildSettings {
         "SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY": "YES",
         "OTHER_SWIFT_FLAGS": [
             "$(inherited)",
+            "-enable-upcoming-feature", "ImmutableWeakCaptures",
             "-Xfrontend", "-warn-long-function-bodies=150",
             "-Xfrontend", "-warn-long-expression-type-checking=150",
         ],

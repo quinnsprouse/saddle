@@ -14,7 +14,7 @@ concurrency:
 
 jobs:
   verify:
-    runs-on: macos-26
+    runs-on: xcode-27
     timeout-minutes: 45
     env:
       MISE_TRUSTED_CONFIG_PATHS: ${{ github.workspace }}

@@ -34,7 +34,7 @@ if (!build.ok) {
 
 capture("xcrun", ["simctl", "boot", udid]);
 run("xcrun", ["simctl", "bootstatus", udid, "-b"]);
-if (values.open) run("open", ["-a", "Simulator", "--args", "-CurrentDeviceUDID", udid]);
+if (values.open) run("open", ["-a", resolve(run("xcode-select", ["-p"]), "../Applications/DeviceHub.app")]);
 run("xcrun", ["simctl", "install", udid, resolve(derivedData, "Build/Products/Debug-iphonesimulator", `${name}.app`)]);
 run("xcrun", ["simctl", "launch", "--terminate-running-process", udid, bundleID]);
 console.log(`Launched ${name} on ${udid}`);

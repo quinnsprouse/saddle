@@ -5,7 +5,7 @@ final class SearchPerformanceTests: XCTestCase {
     func testSearchAcrossTheCatalog() {
         let app = XCUIApplication.isolated()
         app.launchToList()
-        let search = app.searchFields.firstMatch
+        let search = app.openSearch()
         search.tap()
         let metric = XCTOSSignpostMetric(subsystem: "LibraryFeature", category: "Library", name: "search")
         measure(metrics: [metric]) {

@@ -1,8 +1,8 @@
 {
   "mcpServers": {
-    "XcodeBuildMCP": {
+    "MobileBuildMCP": {
       "command": "npx",
-      "args": ["-y", "xcodebuildmcp@2.7.0", "mcp"]
+      "args": ["-y", "mobilebuildmcp@2.7.1", "mcp"]
     }
   }
 }

@@ -13,7 +13,7 @@ final class LibraryJourneyTests: XCTestCase {
         XCTAssertTrue(match.waitForExistence(timeout: 5))
         XCTAssertTrue(match.label.hasPrefix("Copper Ridge"), "Expected a prefix match, got \(match.label)")
 
-        app.searchFields.firstMatch.buttons.firstMatch.tap()
+        app.openSearch().buttons.firstMatch.tap()
         XCTAssertEqual(app.firstTrail.label, firstUnfiltered)
     }
 

@@ -1,6 +1,6 @@
 {
-  "xcode": "26.6",
-  "swift": "6.3",
-  "ios": "26.0",
-  "simulator": "iPhone 17 Pro"
+  "xcode": "27.1",
+  "swift": "6.4",
+  "ios": "27.0",
+  "simulator": "iPhone Duo"
 }

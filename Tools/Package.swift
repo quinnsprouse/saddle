@@ -10,6 +10,7 @@ let strict: [SwiftSetting] = [
     .enableUpcomingFeature("MemberImportVisibility"),
     .enableUpcomingFeature("NonisolatedNonsendingByDefault"),
     .enableUpcomingFeature("InferIsolatedConformances"),
+    .enableUpcomingFeature("ImmutableWeakCaptures"),
     .unsafeFlags([
         "-Xfrontend", "-warn-long-function-bodies=150",
         "-Xfrontend", "-warn-long-expression-type-checking=150",

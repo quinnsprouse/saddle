@@ -25,8 +25,13 @@ iPhone Duo folds between a small outer display and a large inner one, and the ap
 - Keep interactive content inside the safe area and handle each edge on its own. Duo's insets are asymmetric.
 - Give every toolbar button a title and an icon, as `Button(_:systemImage:action:)`. On Duo, toolbars can lay out vertically and use the title. Prefer semantic placements such as `.primaryAction` and `.cancellationAction`.
 - Use `ConcentricRectangle` to match the display's corners.
-- The iOS 27.1 SDK adds `ReservedRegion` and `reservedRegions(kind:options:layoutDirectionBehavior:)` for custom UI near system UI and the fold, `ArrangementView` for two-region layouts, `onHingeChange` for optional hinge effects, and `toolbarVerticalBehavior(_:)`. Guard them with `if #available(iOS 27.1, *)` until the deployment target reaches 27.1, and never lay out from the raw hinge angle.
-- Test in Xcode 27.1's iPhone Duo simulator: open, close, rotate, and fold while the app runs, and check that state survives each change. The `swiftui-pro` skill and Xcode's App Resizability skill both review resizability.
+- The iOS 27.1 SDK adds four Duo APIs. Reach for them only when the containers above aren't enough:
+  - `reservedRegions(kind:options:layoutDirectionBehavior:)` returns the `ReservedRegion`s, `.occlusion` or `.division`, that custom UI must avoid near system UI and the fold.
+  - `ArrangementView` lays out two regions, with the `.split` or `.overlay` style.
+  - `onHingeChange(isEnabled:_:)` reports a `DeviceHingeContext` whose hinge is `.closed`, `.partiallyOpen`, or `.fullyOpen`. Use it for optional effects, never for layout, and never lay out from `angle`.
+  - `toolbarVerticalBehavior(.disabled)` keeps one screen's toolbar horizontal. Pick it once per screen.
+- These APIs are `@available(anyAppleOS 27.1, *)`, and the deployment target is 27.0, so the app still runs on iPhones and iPads that haven't reached 27.1. Guard each use with `if #available(iOS 27.1, *)`.
+- The journeys run on the iPhone Duo simulator, which boots on its outer display. Neither XCTest nor `simctl` can fold it yet, so check each layout change by hand: run `mise run dev -- --open`, then open, fold, and rotate the device in Device Hub while the app runs, and check that state survives each change. The preview canvas's Display override shows the other display. The `swiftui-pro` skill and Xcode's App Resizability skill both review resizability.
 
 ## Design system
 

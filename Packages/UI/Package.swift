@@ -11,6 +11,7 @@ let strict: [SwiftSetting] = [
     .enableUpcomingFeature("MemberImportVisibility"),
     .enableUpcomingFeature("NonisolatedNonsendingByDefault"),
     .enableUpcomingFeature("InferIsolatedConformances"),
+    .enableUpcomingFeature("ImmutableWeakCaptures"),
     .unsafeFlags([
         "-Xfrontend", "-warn-long-function-bodies=150",
         "-Xfrontend", "-warn-long-expression-type-checking=150",
@@ -20,7 +21,7 @@ let strict: [SwiftSetting] = [
 let package = Package(
     name: "UI",
     defaultLocalization: "en",
-    platforms: [.iOS("26.0")],
+    platforms: [.iOS("27.0")],
     products: [
         .library(name: "DesignSystem", targets: ["DesignSystem"]),
         .library(name: "LibraryFeature", targets: ["LibraryFeature"]),

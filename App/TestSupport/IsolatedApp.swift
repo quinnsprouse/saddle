@@ -22,8 +22,19 @@ extension XCUIApplication {
         trailList.buttons.firstMatch
     }
 
-    func search(for query: String) {
+    @discardableResult
+    func openSearch(file: StaticString = #filePath, line: UInt = #line) -> XCUIElement {
         let field = searchFields.firstMatch
+        let collapsedSearch = toolbars.buttons["Search"]
+        if !field.exists, collapsedSearch.exists {
+            collapsedSearch.tap()
+        }
+        XCTAssertTrue(field.waitForExistence(timeout: 5), "The search field did not appear", file: file, line: line)
+        return field
+    }
+
+    func search(for query: String, file: StaticString = #filePath, line: UInt = #line) {
+        let field = openSearch(file: file, line: line)
         field.tap()
         field.typeText(query)
     }
