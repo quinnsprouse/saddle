@@ -49,8 +49,8 @@ public enum Rule: String, CaseIterable, Sendable, Decodable {
             "AnyView hides view identity from SwiftUI and defeats diffing. Use @ViewBuilder, generics, or a switch "
                 + "over concrete views."
         case .designToken:
-            "Raw colors and font sizes belong in DesignSystem. Use a token, a semantic color, or a Dynamic Type "
-                + "text style."
+            "Colors, font sizes, spacing, radii, strokes, and animation timings belong in DesignSystem. Use a "
+                + "token from GUI.md, a semantic style, or a Dynamic Type text style."
         case .print:
             "Use os.Logger with a privacy level instead of print, so logs reach Console and sysdiagnoses."
         case .onAppearTask:

@@ -52,6 +52,7 @@ const fast = [
   { name: "contract", run: () => capture("node", ["scripts/contract.mjs"]) },
   { name: "hook tests", run: () => capture("node", ["scripts/test-hooks.mjs"]) },
   { name: "comments", run: () => capture("node", ["scripts/comments.mjs"]) },
+  { name: "theme reference", run: () => capture("node", ["scripts/gui.mjs", "--check"]) },
   { name: "format", run: () => capture("xcrun", ["swift-format", "lint", "--strict", "--parallel", ...swiftFiles()]) },
   { name: "lint", run: () => capture("swiftlint", ["lint", "--strict", "--quiet"]) },
   {
@@ -149,6 +150,8 @@ const push = [
         "--index-store-path",
         resolve(derivedData, "Index.noindex/DataStore"),
         "--retain-swift-ui-previews",
+        "--retain-files",
+        "Packages/UI/Sources/DesignSystem/Tokens/*.swift",
         "--relative-results",
         "--strict",
         "--disable-update-check",

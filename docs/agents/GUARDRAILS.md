@@ -7,7 +7,7 @@ From strongest to weakest:
 3. **SwiftLint** (`.swiftlint.yml`). Strict, with curated opt-in rules and size limits: files 300 lines, functions 40, types 200, closures 30, cyclomatic complexity 10. In `check:push`, its analyzer rules read a full build log for unused imports, captured mutable variables, and untyped array initializers.
 4. **swift-format** (`.swift-format`). Apple's formatter from the Xcode toolchain, so Xcode's Format command matches `check`.
 5. **Policy** (`Tools/`, `policy.json`). Rules SwiftLint can't express, listed below. `scripts/comments.mjs` extends the comment ban to scripts, hooks, and YAML and TOML config, where no comment is allowed. The one exception is the version tag after a SHA-pinned action, which Dependabot maintains.
-6. **Periphery** in `check:push`. Unused code and needless `public`.
+6. **Periphery** in `check:push`. Unused code and needless `public`. It retains `Packages/UI/Sources/DesignSystem/Tokens/`, because a theme defines a full scale before every step has a consumer.
 7. **Hooks.** Agent hooks give early feedback and Git hooks gate commits and pushes. Neither is a security boundary: protect `main` and require CI on the remote.
 
 ## Policy rules
@@ -25,7 +25,7 @@ From strongest to weakest:
 | `detached-task` | `Task.detached` | a `@concurrent` function or a task group |
 | `legacy-observation` | `ObservableObject`, `@Published`, `@StateObject`, `@ObservedObject`, `@EnvironmentObject` | `@Observable` with `@State`, `@Bindable`, `@Environment` |
 | `type-erased-view` | `AnyView` | `@ViewBuilder`, generics, a `switch` |
-| `design-token` | raw colors and font sizes outside DesignSystem | a token or a text style |
+| `design-token` | outside DesignSystem: raw colors, named hues such as `.yellow`, font sizes, and nonzero numbers for padding, stack spacing, radii, stroke widths, line spacing, tracking, and animation timings | a token from [GUI.md](../../GUI.md), a semantic style, or a text style |
 | `print` | `print`, `debugPrint`, `dump`, `NSLog` | `os.Logger` with a privacy level |
 | `on-appear-task` | a `Task` started in `.onAppear` | `.task { }` |
 | `device-assumption` | `UIScreen.main`, `UIDevice.current.orientation`, `userInterfaceIdiom` | size classes and the space SwiftUI provides |

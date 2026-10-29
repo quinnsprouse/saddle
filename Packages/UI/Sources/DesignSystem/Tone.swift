@@ -8,11 +8,11 @@ public enum Tone: Sendable {
     public var color: Color {
         switch self {
         case .calm:
-            .green
+            Palette.success
         case .caution:
-            .orange
+            Palette.warning
         case .alert:
-            .red
+            Palette.critical
         }
     }
 }

@@ -35,9 +35,7 @@ iPhone Duo folds between a small outer display and a large inner one, and the ap
 
 ## Design system
 
-- Screens use DesignSystem tokens and Dynamic Type text styles such as `.headline` and `.subheadline`. Raw `Color(red:)`, `.system(size:)`, and font sizes are allowed only in DesignSystem.
-- Scale custom dimensions with `@ScaledMetric`, as `Badge` does for its dot.
-- Use `Palette.secondaryText` for secondary text. The system `.secondary` color falls below the accessibility audit's contrast threshold for small text.
+[GUI.md](../../GUI.md) and `gui/` own the design language: the tokens for color, spacing, radius, strokes, type roles, and motion, how to use and change them, components, and interface judgment. Read them before UI work.
 
 ## Accessibility
 

@@ -8,7 +8,7 @@ struct TrailRow: View {
 
     var body: some View {
         HStack(spacing: Spacing.medium) {
-            VStack(alignment: .leading, spacing: Spacing.extraSmall) {
+            VStack(alignment: .leading, spacing: Spacing.xSmall) {
                 Text(trail.name)
                     .font(.headline)
                 Text(verbatim: "\(trail.region) · \(TrailFormat.distance(trail.stats))")
@@ -18,7 +18,7 @@ struct TrailRow: View {
             Spacer(minLength: Spacing.small)
             if isFavorite {
                 Image(systemName: "star.fill")
-                    .foregroundStyle(.yellow)
+                    .foregroundStyle(Palette.favorite)
                     .accessibilityLabel(Text("Favorite", bundle: .module))
             }
             Badge(trail.difficulty.title, tone: trail.difficulty.tone)

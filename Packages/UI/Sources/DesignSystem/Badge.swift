@@ -11,7 +11,7 @@ public struct Badge: View {
     }
 
     public var body: some View {
-        HStack(spacing: Spacing.extraSmall) {
+        HStack(spacing: Spacing.xSmall) {
             Circle()
                 .fill(tone.color)
                 .frame(width: dotSize, height: dotSize)
@@ -21,7 +21,7 @@ public struct Badge: View {
         .font(.caption.weight(.semibold))
         .foregroundStyle(.primary)
         .padding(.horizontal, Spacing.small)
-        .padding(.vertical, Spacing.extraSmall)
+        .padding(.vertical, Spacing.xSmall)
         .background(.fill.tertiary, in: .capsule)
     }
 }

@@ -40,6 +40,10 @@ run = "node scripts/rename.mjs"
 description = "Measure launch, scroll, and search in Release: mise run perf -- [--save NAME] [--compare NAME] [--device UDID --team ID]"
 run = "node scripts/perf.mjs"
 
+[tasks.gui]
+description = "Regenerate gui/theme.md from the DesignSystem tokens"
+run = "node scripts/gui.mjs"
+
 [tasks.fmt]
 description = "Format Swift files and apply SwiftLint autocorrections"
 run = "node scripts/fmt.mjs"

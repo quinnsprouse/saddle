@@ -3,7 +3,7 @@ import { isAbsolute, relative, resolve } from "node:path";
 import { root } from "../../scripts/lib.mjs";
 
 const testHomes = /^(?:Tools\/Tests\/|App\/UITests\/|App\/PerformanceTests\/|App\/TestSupport\/)/;
-const docHomes = /^(?:docs\/agents\/|\.scratch\/|\.github\/)/;
+const docHomes = /^(?:docs\/agents\/|gui\/|GUI\.md$|\.scratch\/|\.github\/)/;
 const checkFiles = [
   /(?:^|\/)\.swiftlint\.yml$/,
   /^\.swift-format$/,
@@ -12,7 +12,7 @@ const checkFiles = [
   /^mise\.toml$/,
   /^toolchain\.json$/,
   /^Tuist\/ProjectDescriptionHelpers\/BuildSettings\.swift$/,
-  /^scripts\/(?:verify|contract|doctor|lib|test-hooks|comments)\.mjs$/,
+  /^scripts\/(?:verify|contract|doctor|lib|test-hooks|comments|gui)\.mjs$/,
   /^Tools\/Sources\//,
   /^\.githooks\//,
   /^\.agents\/hooks\//,
@@ -73,6 +73,9 @@ function editDecision({ path, content }) {
   const isNew = !existsSync(resolve(root, path));
   if (/(?:^|\/)(?:\.build|\.swiftpm|Derived|DerivedData)\/|\.xcodeproj(?:\/|$)|\.xcworkspace(?:\/|$)|^\.git\//.test(path)) {
     return ["deny", `${path} is generated. Change Project.swift or Tuist/ProjectDescriptionHelpers, then run mise run generate.`];
+  }
+  if (path === "gui/theme.md") {
+    return ["deny", "gui/theme.md is generated. Change a token in Packages/UI/Sources/DesignSystem/Tokens/, then run mise run gui."];
   }
   if (/^\.(?:agents|claude)\/skills\/|^skills-lock\.json$/.test(path)) {
     return ["deny", "Vendored skills change only through the skills CLI: mise run update:skills, or npx skills add."];

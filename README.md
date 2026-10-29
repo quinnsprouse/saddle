@@ -22,9 +22,10 @@ mise run dev
 
 - **Strict Swift 6.** Complete concurrency checking, warnings as errors, strict memory safety, `ExistentialAny`, `InternalImportsByDefault`, `MemberImportVisibility`, and type-checking time budgets. A contract test fails if a module drops warnings as errors, strict memory safety, the upcoming features, or main-actor isolation in UI.
 - **Layers the compiler enforces.** Domain holds logic and ports, Services is the only module that touches the outside world, features depend on Domain and DesignSystem but never Services, and the App target is the composition root.
-- **Strict lint.** SwiftLint with curated opt-in and analyzer rules, swift-format, and a policy checker built on swift-syntax for what SwiftLint can't express: no comments except `// why:`, no inline escapes (including `@diagnose`), no unit tests, no blocking calls or concurrency escapes, no `AnyView` or `ObservableObject`, no `UIScreen.main` or orientation checks, and design tokens instead of raw colors and sizes. Scripts and config take no comments either.
+- **Strict lint.** SwiftLint with curated opt-in and analyzer rules, swift-format, and a policy checker built on swift-syntax for what SwiftLint can't express: no comments except `// why:`, no inline escapes (including `@diagnose`), no unit tests, no blocking calls or concurrency escapes, no `AnyView` or `ObservableObject`, no `UIScreen.main` or orientation checks, and design tokens instead of raw colors, sizes, spacing, radii, and animation timings. Scripts and config take no comments either.
 - **End-to-end tests only.** XCUITest journeys with isolated storage, run under Thread Sanitizer, and accessibility audits for contrast, hit areas, labels, and Dynamic Type. App code has no unit tests.
 - **Performance by default.** Off-main-actor work with cancellation, signposts, MetricKit, and Periphery for dead code. `mise run perf` measures launch, scroll, and search in Release and compares against saved baselines.
+- **A design language.** [GUI.md](GUI.md) and `gui/` define the theme, components, and interface judgment, in the pattern of Rodeo's GUI guide. The tokens live in Swift, and `gui/theme.md` is generated from them, so the reference can't drift.
 - **Adaptive layout.** `NavigationSplitView` and size classes, ready for iPad and iPhone Duo's two displays.
 - **Agent hooks** for Claude Code and Codex, shared in `.agents/hooks/`: a guard for risky edits and commands, formatting and lint after each edit, and a stop check that sends the agent back once when `check` fails. [MobileBuildMCP](https://github.com/getsentry/MobileBuildMCP) is configured for simulator control, and vetted SwiftUI and concurrency skills are committed in `.agents/skills/`.
 
@@ -33,10 +34,11 @@ mise run dev
 | Command | Purpose |
 | --- | --- |
 | `mise run dev` | Build and launch on the simulator. `-- --screenshot <path>` saves a screenshot |
-| `mise run check` | Doctor, settings contract, hook tests, comments, format, lint, policy, import check, simulator build |
+| `mise run check` | Doctor, settings contract, hook tests, comments, theme reference, format, lint, policy, import check, simulator build |
 | `mise run check:push` | Check plus the Release build, the SwiftLint analyzer, journeys and audits under Thread Sanitizer, dead code, and dependencies |
 | `mise run check:ci` | Push checks plus the template contract on a fresh copy of the staged files |
 | `mise run perf -- --save NAME` / `--compare NAME` | Measure launch, scroll, and search in Release, and compare against a baseline |
+| `mise run gui` | Regenerate `gui/theme.md` from the DesignSystem tokens |
 | `mise run fmt` | Format Swift files and apply SwiftLint autocorrections |
 | `mise run generate` | Regenerate the workspace after changing `Project.swift` |
 | `mise run rename -- <AppName> <bundle.id>` | Rename the app and its bundle identifier |
@@ -51,7 +53,7 @@ The trail library is a demo of the architecture. To start blank:
 2. Delete the demo types in `Packages/Core/Sources/Domain/` and `Packages/Core/Sources/Services/`. Keep `StorageLocation` if you keep file storage. A target needs at least one source file: delete any target you empty, along with its product, its test target, every `dependencies` entry that names it (Services depends on Domain), and the App's dependency on it in `Project.swift`.
 3. Replace `App/Sources/Composition.swift` and the root view in `App/Sources/MainApp.swift` with your own, and remove `LibraryFeature` from the App target in `Project.swift`.
 4. Replace the journeys in `App/UITests/` and the measurements in `App/PerformanceTests/` with your own.
-5. Run `mise run check:push`. Periphery reports the DesignSystem tokens and helpers that only the demo used. Delete them, or use them.
+5. Run `mise run check:push`. Periphery reports DesignSystem components that only the demo used, such as `Badge`. Delete them, or use them. Periphery keeps the tokens, because they're the theme: remove demo roles such as `Palette.favorite` yourself, then run `mise run gui`.
 
 ## Working with agents
 
@@ -67,6 +69,7 @@ The trail library is a demo of the architecture. To start blank:
 - `Project.swift`, `Tuist/`: the workspace manifest, identity, and build settings
 - `scripts/`: verification tiers, doctor, contract, template contract, and dev tools
 - `.agents/hooks/`, `.githooks/`: agent and Git hooks
+- `GUI.md`, `gui/`: the design language, with a theme reference generated from the tokens
 - `docs/agents/`: implementation guides
 - `.scratch/`: ignored logs, results, screenshots, and experiments
 

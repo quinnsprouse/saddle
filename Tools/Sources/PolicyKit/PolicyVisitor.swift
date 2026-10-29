@@ -71,7 +71,7 @@ final class PolicyVisitor: SyntaxVisitor {
     }
 
     override func visit(_ node: MemberAccessExprSyntax) -> SyntaxVisitorContinueKind {
-        if let rule = CallChecks.rule(forMember: node) {
+        if let rule = CallChecks.rule(forMember: node) ?? StyleChecks.rule(forMember: node) {
             flag(node, rule)
         }
         return .visitChildren
@@ -80,6 +80,8 @@ final class PolicyVisitor: SyntaxVisitor {
     override func visit(_ node: FunctionCallExprSyntax) -> SyntaxVisitorContinueKind {
         if let rule = CallChecks.rule(forCall: node) {
             flag(node, rule)
+        } else if let literal = StyleChecks.literalArgument(in: node) {
+            flag(literal.expression, .designToken)
         }
         return .visitChildren
     }

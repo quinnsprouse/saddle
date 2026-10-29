@@ -6,7 +6,7 @@
 | --- | --- | --- | --- |
 | Domain | `Packages/Core` | nothing | Value types, pure logic, and ports: protocols for everything outside the process |
 | Services | `Packages/Core` | Domain | The ports' live implementations: files, network, defaults, environment |
-| DesignSystem | `Packages/UI` | nothing | Tokens (`Spacing`, `Palette`, `Tone`) and small components |
+| DesignSystem | `Packages/UI` | nothing | The theme's tokens in `Tokens/`, `Tone`, and small components. See [GUI.md](../../GUI.md) |
 | LibraryFeature | `Packages/UI` | Domain, DesignSystem | One feature's views and its `@Observable` model |
 | App | `Project.swift`, `App/Sources` | everything | The composition root: it builds Services and passes them to features |
 

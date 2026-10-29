@@ -4,10 +4,11 @@ Agent-ready starter for native iOS apps: SwiftUI on Swift 6, local Swift package
 
 - `mise run setup` installs the Git hooks and generates the Xcode workspace. Run it after cloning or after `git init`.
 - `mise run dev` builds and launches the app on the pinned simulator. Add `-- --screenshot .scratch/screen.png` to see the result.
-- `mise run check` runs the toolchain doctor, the settings contract, hook tests, the comment check, swift-format, SwiftLint, the policy checker, the import check, and the simulator build. Run it while you work. The Stop hook runs it too.
+- `mise run check` runs the toolchain doctor, the settings contract, hook tests, the comment check, the theme reference check, swift-format, SwiftLint, the policy checker, the import check, and the simulator build. Run it while you work. The Stop hook runs it too.
 - `mise run check:push` adds the Release build, the SwiftLint analyzer, journeys and accessibility audits under Thread Sanitizer, Periphery, and dependency inspection. The pre-push hook runs it.
 - `mise run check:ci` adds the template contract on a fresh copy of the staged files. Stage your changes first.
 - `mise run perf -- --save NAME` and `mise run perf -- --compare NAME` measure launch, scroll, and search in Release and compare against a baseline.
+- `mise run gui` regenerates `gui/theme.md` after you change a design token.
 - `mise run update:skills` fetches the latest version of each vendored skill. Review the diff before you commit it.
 - `mise run doctor` explains setup problems, with a fix for each.
 
@@ -17,12 +18,13 @@ Agent-ready starter for native iOS apps: SwiftUI on Swift 6, local Swift package
 - **No comments, in any file.** Say it in code: a clearer name, a smaller function, a type. In Swift, a `// why:` comment of 6 to 30 words is a last resort, only for a constraint outside the code that you can't fix, such as an SDK bug. Scripts, hooks, and config take no comments at all.
 - **Keep the layers.** Domain holds types, logic, and ports. Services is the only module that touches files, the network, clocks, defaults, or the environment. Features depend on Domain and DesignSystem, never Services. The App target wires them together.
 - **Own concurrency explicitly.** UI modules run on the main actor by default. Move heavy work off it with `@concurrent` functions or actors, check cancellation in long loops, and drop stale results.
-- **Use Observation and stable identity.** `@Observable` models, `.task` for async work tied to a view, no `AnyView`, and DesignSystem tokens instead of raw colors and sizes.
+- **Use Observation and stable identity.** `@Observable` models, `.task` for async work tied to a view, and no `AnyView`.
+- **UI follows [GUI.md](GUI.md).** Screens use system components and semantic styles first, then DesignSystem tokens by name for color, spacing, radius, strokes, type roles, and motion. Report a missing token instead of inventing a value.
 - **No unit tests.** Verify behavior end to end with XCUITest journeys in `App/UITests/`, which run under Thread Sanitizer before every push. Fix what an accessibility audit reports instead of filtering it.
 - **Lay out for every size.** Use size classes, `NavigationSplitView`, and the space SwiftUI provides. iPhone Duo folds between two displays, so never branch on `UIScreen.main`, orientation, or idiom.
 - **Measure performance changes.** Save a baseline before a change that could be slower, compare after, and never raise a tolerance to pass. See [Performance](docs/agents/PERFORMANCE.md).
 - **Don't edit generated files.** The Xcode project and workspace come from `Project.swift`. Change the manifest and run `mise run generate`.
-- **No new docs.** `docs/agents/` holds the guides. Plans, notes, screenshots, traces, and experiments go in `.scratch/`.
+- **No new docs.** `docs/agents/` holds the guides, and `GUI.md` with `gui/` holds the design language. Plans, notes, screenshots, traces, and experiments go in `.scratch/`.
 - **Commits** follow Conventional Commits, `type(scope): description`, at most 100 characters, with no Co-Authored-By trailer.
 
 ## Skills
@@ -40,8 +42,9 @@ Agent-ready starter for native iOS apps: SwiftUI on Swift 6, local Swift package
 
 Open one when the task touches it:
 
+- [GUI](GUI.md): the design language, its tokens, components, and interface judgment. Read it before any UI work.
 - [Architecture](docs/agents/ARCHITECTURE.md): modules, ports, adding a module, concurrency, and dependencies.
-- [SwiftUI](docs/agents/SWIFTUI.md): state, async work, lists, the design system, accessibility, and localization.
+- [SwiftUI](docs/agents/SWIFTUI.md): state, async work, lists, adaptive layout and iPhone Duo, accessibility, and localization.
 - [Testing](docs/agents/TESTING.md): which test to write, UI journeys, the tiers, and the hooks.
 - [Performance](docs/agents/PERFORMANCE.md): measuring, baselines, comparisons, profiling, and performance rules.
 - [Guardrails](docs/agents/GUARDRAILS.md): the compiler settings, lint, policy rules, and what to do when a rule is wrong.

@@ -24,6 +24,11 @@ struct PolicyTests {
             paths: ["App/UITests/"],
             why: "Journeys drive the running app through its interface end to end."
         ),
+        .init(
+            rule: .designToken,
+            paths: ["Packages/UI/Sources/DesignSystem/"],
+            why: "The design system defines the literal values that screens reference by name."
+        ),
     ])
 
     static let rejected: [Case] = [
@@ -71,6 +76,25 @@ struct PolicyTests {
         Case(source: "func read() { queue.sync { work() } }\n", rule: .blockingCall),
         Case(source: "func run() { Task<Void, Never>.detached { await work() } }\n", rule: .detachedTask),
         Case(source: "let view = Text(\"x\").onAppear { Task { await load() } }\n", rule: .onAppearTask),
+        Case(source: "let view = Text(\"x\").padding(16)\n", rule: .designToken),
+        Case(source: "let view = Text(\"x\").padding(.horizontal, 12)\n", rule: .designToken),
+        Case(source: "let stack = VStack(spacing: 8) { content }\n", rule: .designToken),
+        Case(source: "let grid = Grid(horizontalSpacing: -4) { content }\n", rule: .designToken),
+        Case(source: "let shape = RoundedRectangle(cornerRadius: 12)\n", rule: .designToken),
+        Case(source: "let shape = UnevenRoundedRectangle(topLeadingRadius: 12.5)\n", rule: .designToken),
+        Case(source: "let edge = shape.stroke(.primary, lineWidth: 2)\n", rule: .designToken),
+        Case(source: "let view = Text(\"x\").shadow(radius: 4)\n", rule: .designToken),
+        Case(source: "let motion = Animation.easeInOut(duration: 0.3)\n", rule: .designToken),
+        Case(source: "let motion = Animation.spring(duration: 0.4, bounce: 0.2)\n", rule: .designToken),
+        Case(source: "let view = Text(\"x\").animation(.snappy(duration: 0.2), value: on)\n", rule: .designToken),
+        Case(source: "let view = Text(\"x\").foregroundStyle(.yellow)\n", rule: .designToken),
+        Case(source: "let tint = Color.blue.opacity(0.5)\n", rule: .designToken),
+        Case(source: "let scrim = Color.black\n", rule: .designToken),
+        Case(source: "let view = Text(\"x\").tracking(1.5)\n", rule: .designToken),
+        Case(source: "let view = Text(\"x\").lineSpacing(4)\n", rule: .designToken),
+        Case(source: "let view = Text(\"x\").foregroundStyle(.blue.opacity(0.5))\n", rule: .designToken),
+        Case(source: "let view = Text(\"x\").foregroundStyle(.blue.gradient)\n", rule: .designToken),
+        Case(source: "let motion = Animation.default.delay(0.2)\n", rule: .designToken),
     ]
 
     static let accepted: [Case] = [
@@ -98,6 +122,20 @@ struct PolicyTests {
         Case(source: "import Testing\n", rule: nil, path: "App/UITests/LibraryJourneyTests.swift"),
         Case(source: "let screen = window?.windowScene?.screen\n", rule: nil),
         Case(source: "let angle = image.orientation\n", rule: nil),
+        Case(source: "let view = Text(\"x\").padding(Spacing.small)\n", rule: nil),
+        Case(source: "let view = Text(\"x\").padding()\n", rule: nil),
+        Case(source: "let stack = VStack(spacing: 0) { content }\n", rule: nil),
+        Case(source: "let view = Text(\"x\").frame(width: 44, height: 44)\n", rule: nil),
+        Case(source: "let view = Text(\"x\").foregroundStyle(.secondary)\n", rule: nil),
+        Case(source: "let view = Text(\"x\").fontWeight(.black)\n", rule: nil),
+        Case(source: "let signal = Signal.red\n", rule: nil),
+        Case(source: "let delay = ContinuousClock().sleep(for: .seconds(1))\n", rule: nil),
+        Case(source: "let view = Text(\"x\").animation(Motion.small, value: on)\n", rule: nil),
+        Case(
+            source: "let shape = RoundedRectangle(cornerRadius: 12)\n",
+            rule: nil,
+            path: "Packages/UI/Sources/DesignSystem/Card.swift"
+        ),
     ]
 
     @Test(arguments: rejected)
@@ -121,6 +159,19 @@ struct PolicyTests {
         let violation = try #require(violations.first)
         #expect((violation.line, violation.column) == (2, 13))
         #expect(violation.description.hasPrefix("Example.swift:2:13: error: "))
+    }
+
+    @Test func styleViolationsPointAtTheLiteral() throws {
+        let violations = Policy.check(
+            source: "let view = Text(\"x\")\n    .bold()\n    .padding(.vertical, 6)\n",
+            path: "Example.swift",
+            configuration: Self.configuration
+        )
+        let violation = try #require(violations.first)
+        #expect((violation.line, violation.column) == (3, 25))
+        let labeled = Policy.check(
+            source: "let stack = HStack(spacing: 8) {}\n", path: "Example.swift", configuration: Self.configuration)
+        #expect(labeled.map(\.column) == [29])
     }
 
     @Test func anAllowanceNeedsAReason() throws {
