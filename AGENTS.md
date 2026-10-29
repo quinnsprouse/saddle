@@ -4,24 +4,30 @@ Agent-ready starter for native iOS apps: SwiftUI on Swift 6, local Swift package
 
 - `mise run setup` installs the Git hooks and generates the Xcode workspace. Run it after cloning or after `git init`.
 - `mise run dev` builds and launches the app on the pinned simulator. Add `-- --screenshot .scratch/screen.png` to see the result.
-- `mise run check` runs the toolchain doctor, the settings contract, hook tests, swift-format, SwiftLint, the policy checker, package tests, and the simulator build. Run it while you work. The Stop hook runs it too.
-- `mise run check:push` adds the Release build, UI journeys and accessibility audits, Periphery, dependency inspection, and Thread Sanitizer. The pre-push hook runs it.
+- `mise run check` runs the toolchain doctor, the settings contract, hook tests, the comment check, swift-format, SwiftLint, the policy checker, the import check, and the simulator build. Run it while you work. The Stop hook runs it too.
+- `mise run check:push` adds the Release build, the SwiftLint analyzer, journeys and accessibility audits under Thread Sanitizer, Periphery, and dependency inspection. The pre-push hook runs it.
 - `mise run check:ci` adds the template contract on a fresh copy of the staged files. Stage your changes first.
 - `mise run perf -- --save NAME` and `mise run perf -- --compare NAME` measure launch, scroll, and search in Release and compare against a baseline.
+- `mise run update:skills` fetches the latest version of each vendored skill. Review the diff before you commit it.
 - `mise run doctor` explains setup problems, with a fix for each.
 
 ## Rules
 
 - **Fix the cause the diagnostic names.** Warnings are errors. Never suppress a rule inline: `swiftlint:disable`, `swift-format-ignore`, and `periphery:ignore` fail the policy check. If a minimal example proves a rule wrong for a directory, add an allowance with a `why` to `policy.json`. A person approves that edit.
-- **No comments.** Say it in code: a clearer name, a smaller function, a type. A `// why:` comment of 6 to 30 words is a last resort, only for a constraint outside the code that you can't fix, such as an SDK bug.
+- **No comments, in any file.** Say it in code: a clearer name, a smaller function, a type. In Swift, a `// why:` comment of 6 to 30 words is a last resort, only for a constraint outside the code that you can't fix, such as an SDK bug. Scripts, hooks, and config take no comments at all.
 - **Keep the layers.** Domain holds types, logic, and ports. Services is the only module that touches files, the network, clocks, defaults, or the environment. Features depend on Domain and DesignSystem, never Services. The App target wires them together.
 - **Own concurrency explicitly.** UI modules run on the main actor by default. Move heavy work off it with `@concurrent` functions or actors, check cancellation in long loops, and drop stale results.
 - **Use Observation and stable identity.** `@Observable` models, `.task` for async work tied to a view, no `AnyView`, and DesignSystem tokens instead of raw colors and sizes.
-- **Test behavior through public API.** Package tests use the public API only, with no `@testable`. Journeys and accessibility audits live in `App/UITests/`. Fix what an audit reports instead of filtering it.
+- **No unit tests.** Verify behavior end to end with XCUITest journeys in `App/UITests/`, which run under Thread Sanitizer before every push. Fix what an accessibility audit reports instead of filtering it.
+- **Lay out for every size.** Use size classes, `NavigationSplitView`, and the space SwiftUI provides. iPhone Duo folds between two displays, so never branch on `UIScreen.main`, orientation, or idiom.
 - **Measure performance changes.** Save a baseline before a change that could be slower, compare after, and never raise a tolerance to pass. See [Performance](docs/agents/PERFORMANCE.md).
 - **Don't edit generated files.** The Xcode project and workspace come from `Project.swift`. Change the manifest and run `mise run generate`.
 - **No new docs.** `docs/agents/` holds the guides. Plans, notes, screenshots, traces, and experiments go in `.scratch/`.
 - **Commits** follow Conventional Commits, `type(scope): description`, at most 100 characters, with no Co-Authored-By trailer.
+
+## Skills
+
+`.agents/skills/` holds vetted skills, committed to Git and listed in `skills-lock.json`: `swiftui-pro` for modern SwiftUI, layout, and iPhone Duo resizability, and `swift-concurrency` for actors, Sendable, and isolation. Use them for API advice. Where a skill disagrees with these rules, such as asking for comments or unit tests, these rules win.
 
 ## What you need from me
 

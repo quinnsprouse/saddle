@@ -10,6 +10,7 @@ extension XCUIApplication {
             ?? FileManager.default.temporaryDirectory
             .appending(path: UUID().uuidString, directoryHint: .isDirectory)
         app.launchEnvironment["APP_DATA_DIRECTORY"] = directory.path(percentEncoded: false)
+        app.launchEnvironment["TSAN_OPTIONS"] = "halt_on_error=1"
         return app
     }
 

@@ -8,6 +8,10 @@ periphery = "3.8.0"
 description = "Install the Git hooks and generate the Xcode workspace"
 run = "node scripts/setup.mjs"
 
+[tasks."update:skills"]
+description = "Fetch the latest version of each skill in skills-lock.json; review the diff before you commit"
+run = "npx -y skills@1.5.15 update --project --yes"
+
 [tasks.generate]
 description = "Regenerate the Xcode workspace from Project.swift"
 run = "tuist generate --no-open"

@@ -18,7 +18,12 @@ struct PolicyTests {
             rule: .worldAccess,
             paths: ["Packages/Core/Sources/Services/"],
             why: "Services own the outside world for every other module."
-        )
+        ),
+        .init(
+            rule: .unitTest,
+            paths: ["App/UITests/"],
+            why: "Journeys drive the running app through its interface end to end."
+        ),
     ])
 
     static let rejected: [Case] = [
@@ -30,6 +35,12 @@ struct PolicyTests {
         Case(source: "// swiftlint:disable:next force_unwrapping\nlet value = optional!\n", rule: .lintEscape),
         Case(source: "// swift-format-ignore\nlet value = 1\n", rule: .lintEscape),
         Case(source: "@testable import Domain\n", rule: .testableImport),
+        Case(source: "import Testing\n", rule: .unitTest),
+        Case(source: "import XCTest\n", rule: .unitTest),
+        Case(source: "@diagnose(DeprecatedDeclaration, as: ignored) func legacy() {}\n", rule: .lintEscape),
+        Case(source: "let width = UIScreen.main.bounds.width\n", rule: .deviceAssumption),
+        Case(source: "let isPad = UIDevice.current.userInterfaceIdiom == .pad\n", rule: .deviceAssumption),
+        Case(source: "let rotated = UIDevice.current.orientation.isLandscape\n", rule: .deviceAssumption),
         Case(source: "@Test(.disabled(\"flaky\")) func works() {}\n", rule: .skippedTest),
         Case(source: "func works() throws { throw XCTSkip(\"later\") }\n", rule: .skippedTest),
         Case(source: "let session = URLSession.shared\n", rule: .worldAccess),
@@ -84,6 +95,9 @@ struct PolicyTests {
         Case(source: "let view = Text(\"x\").onAppear { label = \"Task\" }\n", rule: nil),
         Case(source: "let view = Text(\"x\").onAppear { guard !Task.isCancelled else { return } }\n", rule: nil),
         Case(source: "func refresh() async { await store.sync() }\n", rule: nil),
+        Case(source: "import Testing\n", rule: nil, path: "App/UITests/LibraryJourneyTests.swift"),
+        Case(source: "let screen = window?.windowScene?.screen\n", rule: nil),
+        Case(source: "let angle = image.orientation\n", rule: nil),
     ]
 
     @Test(arguments: rejected)

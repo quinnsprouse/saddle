@@ -13,6 +13,7 @@
 3. Set the same iOS version in each `Packages/*/Package.swift` and in `Tuist/ProjectDescriptionHelpers/Identity.swift`. `mise run check` names any file you missed.
 4. Move swift-syntax in `Tools/Package.swift` to the release for the new Swift, then run `swift package update --package-path Tools`.
 5. Run `mise run check:ci` and fix new diagnostics at their source.
+6. For Xcode 27.1 or later, run the journeys and a manual pass on the iPhone Duo simulator too. See [SwiftUI](SWIFTUI.md#adaptive-layout-and-iphone-duo).
 
 ## Workspace
 
@@ -28,6 +29,10 @@ Tuist generates `<App>.xcworkspace` from `Project.swift` and `Tuist/ProjectDescr
 
 - **XcodeBuildMCP**, pinned in `.mcp.json` and `.codex/config.toml`: build, run, tap, type, take screenshots, read the view hierarchy, and debug on the simulator.
 - **Xcode's MCP server**, in Xcode 26.3 and later: build logs, tests, previews, and Apple documentation from a running Xcode. Turn on Xcode > Settings > Intelligence > Xcode Tools, then run `claude mcp add xcode -- xcrun mcpbridge` or `codex mcp add xcode -- xcrun mcpbridge`.
+
+## Skills
+
+Git pins the skills: `.agents/skills/` holds the committed files for `swiftui-pro` (Paul Hudson) and `swift-concurrency` (Antoine van der Lee), and `skills-lock.json` records where each came from. Claude Code reads them through `.claude/skills/`. The skills CLI can't pin a commit, so `mise run update:skills` fetches each skill's latest version: read the diff before you commit it. Add a skill with `npx skills add <owner>/<repo> --skill <name>` after you read it. The guard refuses hand edits to vendored skills.
 
 ## CI
 

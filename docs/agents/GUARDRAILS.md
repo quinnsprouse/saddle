@@ -2,11 +2,11 @@
 
 From strongest to weakest:
 
-1. **The compiler.** Swift 6 language mode with complete concurrency checking, warnings as errors, strict memory safety, `ExistentialAny`, `InternalImportsByDefault`, `MemberImportVisibility`, approachable concurrency, and a 150 ms budget for type-checking any function or expression. `scripts/contract.mjs` fails `check` if a package target drops warnings as errors, strict memory safety, or an upcoming feature, if a UI target drops main-actor isolation, if `BuildSettings.swift` drops a strict Xcode key, or if a setting applies to only one configuration. It doesn't check the type-checking budget flags.
+1. **The compiler.** Swift 6 language mode with complete concurrency checking, warnings as errors, strict memory safety, `ExistentialAny`, `InternalImportsByDefault`, `MemberImportVisibility`, approachable concurrency, and a 150 ms budget for type-checking any function or expression. `scripts/contract.mjs` fails `check` if a package target drops warnings as errors, strict memory safety, or an upcoming feature, if a UI target drops main-actor isolation, if `BuildSettings.swift` drops a strict Xcode key, or if a setting applies to only one configuration. It also rejects test targets in app packages and any flag or setting that downgrades or silences warnings. It doesn't check the type-checking budget flags.
 2. **The module graph.** A module sees only what its Package.swift declares. Features can't reach Services.
-3. **SwiftLint** (`.swiftlint.yml`). Strict, with curated opt-in rules and size limits: files 300 lines, functions 40, types 200, closures 30, cyclomatic complexity 10.
+3. **SwiftLint** (`.swiftlint.yml`). Strict, with curated opt-in rules and size limits: files 300 lines, functions 40, types 200, closures 30, cyclomatic complexity 10. In `check:push`, its analyzer rules read a full build log for unused imports, captured mutable variables, and untyped array initializers.
 4. **swift-format** (`.swift-format`). Apple's formatter from the Xcode toolchain, so Xcode's Format command matches `check`.
-5. **Policy** (`Tools/`, `policy.json`). Rules SwiftLint can't express, listed below.
+5. **Policy** (`Tools/`, `policy.json`). Rules SwiftLint can't express, listed below. `scripts/comments.mjs` extends the comment ban to scripts, hooks, and YAML and TOML config, where no comment is allowed. The one exception is the version tag after a SHA-pinned action, which Dependabot maintains.
 6. **Periphery** in `check:push`. Unused code and needless `public`.
 7. **Hooks.** Agent hooks give early feedback and Git hooks gate commits and pushes. Neither is a security boundary: protect `main` and require CI on the remote.
 
@@ -15,9 +15,10 @@ From strongest to weakest:
 | Rule | Rejects | Instead |
 | --- | --- | --- |
 | `comment` | any comment except `// why:` of 6 to 30 words | a clearer name, a smaller function, a type |
-| `lint-escape` | `swiftlint:`, `swift-format-ignore`, `periphery:ignore` | fix the cause |
+| `lint-escape` | `swiftlint:`, `swift-format-ignore`, `periphery:ignore`, `@diagnose` | fix the cause |
 | `skipped-test` | `.disabled(...)`, `.enabled(if:)`, `XCTSkip`, `withKnownIssue` | fix or delete the test |
-| `testable-import` | `@testable import` | test the public API |
+| `testable-import` | `@testable import` | test through the app |
+| `unit-test` | `import Testing` or `import XCTest` outside journeys, performance tests, and guardrail tests | a journey in `App/UITests/` |
 | `world-access` | `URLSession`, `FileManager`, `UserDefaults`, `ProcessInfo`, `NotificationCenter`, `DispatchQueue`, `UIApplication`, `Date()`, `Date.now`, `Bundle.main` outside the allowed paths | a Domain port implemented in Services |
 | `blocking-call` | `Thread.sleep`, `sleep`, semaphores, dispatch groups, `queue.sync { }` | async/await and actors |
 | `concurrency-escape` | `@unchecked Sendable`, `nonisolated(unsafe)`, `unowned(unsafe)`, `@preconcurrency` | a Sendable type or an actor |
@@ -27,6 +28,7 @@ From strongest to weakest:
 | `design-token` | raw colors and font sizes outside DesignSystem | a token or a text style |
 | `print` | `print`, `debugPrint`, `dump`, `NSLog` | `os.Logger` with a privacy level |
 | `on-appear-task` | a `Task` started in `.onAppear` | `.task { }` |
+| `device-assumption` | `UIScreen.main`, `UIDevice.current.orientation`, `userInterfaceIdiom` | size classes and the space SwiftUI provides |
 
 Policy is a tripwire, not a type system: an alias or a module-qualified name gets past it. Don't do that. Review catches it, and the next agent copies it.
 

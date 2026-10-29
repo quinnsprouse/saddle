@@ -26,7 +26,5 @@ let package = Package(
     targets: [
         .target(name: "Domain", swiftSettings: strict),
         .target(name: "Services", dependencies: ["Domain"], swiftSettings: strict),
-        .testTarget(name: "DomainTests", dependencies: ["Domain"], swiftSettings: strict),
-        .testTarget(name: "ServicesTests", dependencies: ["Domain", "Services"], swiftSettings: strict),
     ]
 )

@@ -46,16 +46,15 @@ private struct FavoriteButton: View {
     let isFavorite: Bool
     let toggle: () -> Void
 
+    private var title: String {
+        isFavorite
+            ? String(localized: "Remove from favorites", bundle: .module)
+            : String(localized: "Add to favorites", bundle: .module)
+    }
+
     var body: some View {
-        Button(action: toggle) {
-            Image(systemName: isFavorite ? "star.fill" : "star")
-        }
-        .accessibilityLabel(
-            isFavorite
-                ? Text("Remove from favorites", bundle: .module)
-                : Text("Add to favorites", bundle: .module)
-        )
-        .accessibilityIdentifier("favorite-button")
-        .sensoryFeedback(.selection, trigger: isFavorite)
+        Button(title, systemImage: isFavorite ? "star.fill" : "star", action: toggle)
+            .accessibilityIdentifier("favorite-button")
+            .sensoryFeedback(.selection, trigger: isFavorite)
     }
 }

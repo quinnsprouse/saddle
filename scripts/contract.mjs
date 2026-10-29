@@ -22,6 +22,7 @@ const xcodeSettings = {
   SWIFT_UPCOMING_FEATURE_INTERNAL_IMPORTS_BY_DEFAULT: "YES",
   SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY: "YES",
 };
+const suppressionFlags = ["-suppress-warnings", "-Wwarning", "-no-warnings-as-errors"];
 const problems = [];
 
 function packages() {
@@ -37,7 +38,27 @@ function settingKinds(target) {
     .map((setting) => setting.kind);
 }
 
+function checkDowngrades(path, target) {
+  const where = `${path}/Package.swift target ${target.name}`;
+  for (const { kind } of target.settings) {
+    const level = kind.treatAllWarnings?._0 ?? kind.treatWarning?._1;
+    if (level !== undefined && level !== "error") problems.push(`${where}: warnings stay errors; remove the downgrade.`);
+    const flags = kind.unsafeFlags?._0 ?? [];
+    for (const flag of suppressionFlags.filter((name) => flags.includes(name))) {
+      problems.push(`${where}: remove ${flag}; fix the diagnostic instead.`);
+    }
+  }
+}
+
 function checkTarget(path, target) {
+  checkDowngrades(path, target);
+  if (path !== "Tools" && target.type === "test") {
+    problems.push(
+      `${path}/Package.swift target ${target.name}: app packages have no unit tests. Delete it and cover the ` +
+        "behavior with a journey in App/UITests/.",
+    );
+    return;
+  }
   const kinds = settingKinds(target);
   const has = (name, value) => kinds.some((kind) => kind[name] && (value === undefined || kind[name]._0 === value));
   const where = `${path}/Package.swift target ${target.name}`;
@@ -74,7 +95,13 @@ function checkXcodeSettings() {
       problems.push(`Tuist/ProjectDescriptionHelpers/BuildSettings.swift: strict must set "${key}": "${value}".`);
     }
   }
+  for (const flag of suppressionFlags.filter((name) => helper.includes(name))) {
+    problems.push(`Tuist/ProjectDescriptionHelpers/BuildSettings.swift: remove ${flag}; fix the diagnostic instead.`);
+  }
   const project = readFileSync(resolve(root, "Project.swift"), "utf8");
+  for (const flag of suppressionFlags.filter((name) => project.includes(name))) {
+    problems.push(`Project.swift: remove ${flag}; fix the diagnostic instead.`);
+  }
   for (const key of Object.keys(xcodeSettings).filter((name) => project.includes(name))) {
     problems.push(`Project.swift: move ${key} into BuildSettings.swift; targets must not override it.`);
   }

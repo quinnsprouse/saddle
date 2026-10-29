@@ -10,9 +10,9 @@
 | LibraryFeature | `Packages/UI` | Domain, DesignSystem | One feature's views and its `@Observable` model |
 | App | `Project.swift`, `App/Sources` | everything | The composition root: it builds Services and passes them to features |
 
-A feature never imports Services. It takes a port, such as `any FavoritesStore`, and `App/Sources/Composition.swift` passes the live implementation. A test passes its own.
+A feature never imports Services. It takes a port, such as `any FavoritesStore`, and `App/Sources/Composition.swift` passes the live implementation. Journeys steer the live implementations through launch environment values such as `APP_DATA_DIRECTORY`.
 
-Core builds and tests on the Mac, so keep it free of UIKit and SwiftUI. Packages/UI runs on the main actor by default.
+Core builds on the Mac with an explicit-import check, so keep it free of UIKit and SwiftUI. Packages/UI runs on the main actor by default.
 
 ## Add a module
 

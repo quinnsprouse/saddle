@@ -5,10 +5,36 @@ import { capture, derivedData, identity, root, simulator, swiftFiles, workspace,
 const policyBinary = ".build/spm/tools/debug/policy";
 const diagnosticLimit = 40;
 
+const sanitizedData = resolve(root, ".build/DerivedData-tsan");
+const analyzedData = resolve(root, ".build/DerivedData-analyze");
+
 function xcodebuild(action, ...extra) {
+  return xcodebuildIn(derivedData, action, ...extra);
+}
+
+function xcodebuildIn(dataPath, action, ...extra) {
   const scheme = identity().name;
-  const args = [action, "-workspace", workspace(), "-scheme", scheme, "-derivedDataPath", derivedData, "-quiet"];
+  const args = [action, "-workspace", workspace(), "-scheme", scheme, "-derivedDataPath", dataPath, "-quiet"];
   return capture("xcodebuild", [...args, ...extra]);
+}
+
+function analyze() {
+  const scheme = identity().name;
+  const build = capture("xcodebuild", [
+    "clean",
+    "build-for-testing",
+    "-workspace",
+    workspace(),
+    "-scheme",
+    scheme,
+    "-destination",
+    "generic/platform=iOS Simulator",
+    "-derivedDataPath",
+    analyzedData,
+  ]);
+  if (!build.ok) return build;
+  const log = writeLog("analyze-build", build.output);
+  return capture("swiftlint", ["analyze", "--strict", "--quiet", "--compiler-log-path", log]);
 }
 
 function sequence(...commands) {
@@ -25,6 +51,7 @@ const fast = [
   { name: "toolchain", run: () => capture("node", ["scripts/doctor.mjs", "--required"]) },
   { name: "contract", run: () => capture("node", ["scripts/contract.mjs"]) },
   { name: "hook tests", run: () => capture("node", ["scripts/test-hooks.mjs"]) },
+  { name: "comments", run: () => capture("node", ["scripts/comments.mjs"]) },
   { name: "format", run: () => capture("xcrun", ["swift-format", "lint", "--strict", "--parallel", ...swiftFiles()]) },
   { name: "lint", run: () => capture("swiftlint", ["lint", "--strict", "--quiet"]) },
   {
@@ -40,10 +67,10 @@ const fast = [
     run: () => capture("swift", ["test", "--package-path", "Tools", "--scratch-path", ".build/spm/tools"]),
   },
   {
-    name: "core tests",
+    name: "import check",
     run: () =>
       capture("swift", [
-        "test",
+        "build",
         "--package-path",
         "Packages/Core",
         "--scratch-path",
@@ -66,16 +93,38 @@ const push = [
     needs: "generate",
     run: () => xcodebuild("build", "-configuration", "Release", "-destination", "generic/platform=iOS Simulator"),
   },
+  { name: "analyze", needs: "generate", run: analyze },
   {
-    name: "ui tests",
-    needs: "build",
+    name: "sanitized build",
+    needs: "generate",
+    run: () =>
+      xcodebuildIn(
+        sanitizedData,
+        "build-for-testing",
+        "-destination",
+        "generic/platform=iOS Simulator",
+        "-enableThreadSanitizer",
+        "YES",
+        "ENABLE_THREAD_SANITIZER=YES",
+      ),
+  },
+  {
+    name: "journeys",
+    needs: "sanitized build",
     run: () => {
       const bundle = resolve(root, ".scratch/results/ui.xcresult");
       rmSync(bundle, { recursive: true, force: true });
-      const result = xcodebuild(
+      const device = simulator();
+      capture("xcrun", ["simctl", "boot", device]);
+      const booted = capture("xcrun", ["simctl", "bootstatus", device, "-b"]);
+      if (!booted.ok) return booted;
+      const result = xcodebuildIn(
+        sanitizedData,
         "test-without-building",
         "-destination",
-        `id=${simulator()}`,
+        `id=${device}`,
+        "-enableThreadSanitizer",
+        "YES",
         "-only-testing:UITests",
         "-parallel-testing-enabled",
         "NO",
@@ -105,18 +154,6 @@ const push = [
       ]),
   },
   { name: "dependencies", needs: "generate", run: () => capture("tuist", ["inspect", "dependencies"]) },
-  {
-    name: "thread sanitizer",
-    run: () =>
-      capture("swift", [
-        "test",
-        "--package-path",
-        "Packages/Core",
-        "--scratch-path",
-        ".build/spm/core-tsan",
-        "--sanitize=thread",
-      ]),
-  },
 ];
 
 const ci = [{ name: "template", run: () => capture("node", ["scripts/template.mjs"]) }];

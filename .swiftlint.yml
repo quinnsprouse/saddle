@@ -14,6 +14,7 @@ disabled_rules:
 opt_in_rules:
   - accessibility_label_for_image
   - accessibility_trait_for_button
+  - anonymous_argument_in_multiline_closure
   - array_init
   - async_without_await
   - closure_body_length
@@ -29,6 +30,7 @@ opt_in_rules:
   - discouraged_none_name
   - discouraged_object_literal
   - discouraged_optional_boolean
+  - discouraged_optional_collection
   - empty_collection_literal
   - empty_count
   - empty_string
@@ -40,6 +42,7 @@ opt_in_rules:
   - first_where
   - flatmap_over_map_reduce
   - force_unwrapping
+  - function_default_parameter_at_end
   - identical_operands
   - implicitly_unwrapped_optional
   - joined_default_parameter
@@ -47,8 +50,11 @@ opt_in_rules:
   - legacy_multiple
   - legacy_objc_type
   - lower_acl_than_parent
+  - no_empty_block
   - nslocalizedstring_key
+  - optional_enum_case_matching
   - overridden_super_call
+  - prefer_condition_list
   - prefer_key_path
   - prefer_self_in_static_references
   - prefer_self_type_over_type_of_self
@@ -63,17 +69,26 @@ opt_in_rules:
   - shorthand_optional_binding
   - sorted_first_last
   - static_operator
+  - strict_fileprivate
   - superfluous_else
   - test_case_accessibility
   - toggle_bool
   - unavailable_function
   - unhandled_throwing_task
+  - unneeded_escaping
   - unneeded_parentheses_in_closure_argument
+  - unneeded_throws_rethrows
   - unowned_variable_capture
   - untyped_error_in_catch
+  - unused_parameter
   - weak_delegate
   - xct_specific_matcher
   - yoda_condition
+
+analyzer_rules:
+  - capture_variable
+  - typesafe_array_init
+  - unused_import
 
 line_length:
   warning: 120

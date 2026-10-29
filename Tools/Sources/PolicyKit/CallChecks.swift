@@ -38,9 +38,20 @@ enum CallChecks {
             return .blockingCall
         case ("Date", "now"), ("Bundle", "main"):
             return .worldAccess
+        case ("UIScreen", "main"), (_, "userInterfaceIdiom"):
+            return .deviceAssumption
+        case (_, "orientation") where isCurrentDevice(node.base):
+            return .deviceAssumption
         default:
             return nil
         }
+    }
+
+    private static func isCurrentDevice(_ base: ExprSyntax?) -> Bool {
+        guard let member = base?.as(MemberAccessExprSyntax.self) else {
+            return false
+        }
+        return member.declName.baseName.text == "current" && member.base.flatMap(calleeName) == "UIDevice"
     }
 
     static func rule(forCall node: FunctionCallExprSyntax) -> Rule? {

@@ -3,6 +3,7 @@ import { spawnSync } from "node:child_process";
 import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { hashCommentLines, javaScriptCommentLines } from "./comments.mjs";
 import { root } from "./lib.mjs";
 
 function toolName(toolInput) {
@@ -51,7 +52,10 @@ const cases = [
   [{ file_path: "docs/agents/NEW_GUIDE.md" }, "allow"],
   [{ file_path: "Packages/UI/Sources/LibraryFeature/LibraryModelTests.swift" }, "deny"],
   [{ file_path: "App/Sources/Probe.swift", content: "import XCTest\n" }, "deny"],
-  [{ file_path: "Packages/Core/Tests/DomainTests/NewTests.swift", content: "import Testing\n" }, "allow"],
+  [{ file_path: "Packages/Core/Tests/DomainTests/NewTests.swift", content: "import Testing\n" }, "deny"],
+  [{ file_path: "Tools/Tests/PolicyKitTests/NewRuleTests.swift", content: "import Testing\n" }, "allow"],
+  [{ file_path: ".agents/skills/swiftui-pro/SKILL.md" }, "deny"],
+  [{ file_path: "skills-lock.json" }, "deny"],
   [{ file_path: "App/UITests/NewJourneyTests.swift", content: "import XCTest\n" }, "allow"],
   [{ file_path: ".swiftlint.yml" }, "ask"],
   [{ file_path: "Packages/UI/Sources/LibraryFeature/.swiftlint.yml" }, "ask"],
@@ -103,6 +107,39 @@ for (const [toolInput, expected] of cases) {
 }
 for (const [toolInput, expected] of codexCases) {
   assert.equal(guard(toolInput, "--codex"), expected, `codex ${JSON.stringify(toolInput)}`);
+}
+
+const javaScriptCases = [
+  ["const a = 1;\n// note\n", [2]],
+  ["const a = 1; /* block */\n", [1]],
+  ['const url = "https://example.com";\n', []],
+  ["const re = /\\/\\*[\\s\\S]*?\\*\\//g;\n", []],
+  ["const t = `a ${ {x: 1}.x } // not a comment`;\n", []],
+  ["const t = `a ${b}`; // trailing\n", [1]],
+  ["const half = total / 2; const r = (x) => /a\\/b/.test(x);\n", []],
+  ["if (ok) /[/*]/.test(value);\n", []],
+  ["if (ok) /https?:\\/\\//.test(url);\n", []],
+  ["const half = i++ / 2; // note\n", [1]],
+  ["const unfinished = 1; /* never closed\n", [1]],
+  ["const result = handlers.with(value) / 2; // note\n", [1]],
+  ["const items = list.with(0, first); if (ok) /x/.test(items);\n", []],
+];
+for (const [source, expected] of javaScriptCases) {
+  assert.deepEqual(javaScriptCommentLines(source), expected, source);
+}
+const hashCases = [
+  ["#!/bin/sh\nset -eu\n", []],
+  ["# note\nkey = 1\n", [1]],
+  ['key = "a # b"\n', []],
+  ["      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1\n", []],
+  ["run: make # build\n", [1]],
+  ["echo ok #comment\n", [1]],
+  ["value = 1 #comment\n", [1]],
+  ['echo "a \\" # b"\n', []],
+  ["echo ${#items}\n", []],
+];
+for (const [source, expected] of hashCases) {
+  assert.deepEqual(hashCommentLines(source), expected, source);
 }
 
 const directory = mkdtempSync(join(tmpdir(), "saddle-commit-"));

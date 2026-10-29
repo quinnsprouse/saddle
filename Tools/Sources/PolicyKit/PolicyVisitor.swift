@@ -18,6 +18,9 @@ final class PolicyVisitor: SyntaxVisitor {
     }
 
     override func visit(_ node: ImportDeclSyntax) -> SyntaxVisitorContinueKind {
+        if let module = node.path.first?.name.text, ["Testing", "XCTest"].contains(module) {
+            flag(node.path, .unitTest)
+        }
         for attribute in node.attributes.compactMap({ $0.as(AttributeSyntax.self) }) {
             let name = attribute.attributeName.trimmedDescription
             if name == "testable" {
@@ -33,6 +36,9 @@ final class PolicyVisitor: SyntaxVisitor {
         let name = node.attributeName.trimmedDescription
         if name == "unchecked" || name == "preconcurrency" && node.parent?.parent?.is(ImportDeclSyntax.self) != true {
             flag(node, .concurrencyEscape)
+        }
+        if name == "diagnose" {
+            flag(node, .lintEscape)
         }
         if ["Test", "Suite"].contains(name), case .argumentList(let arguments) = node.arguments,
             arguments.contains(where: { $0.label == nil && CallChecks.isConditionTrait($0.expression) })

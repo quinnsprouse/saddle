@@ -10,6 +10,7 @@ public struct TrailIndex: Sendable {
     private static let cancellationStride = 1_024
 
     private let entries: [Entry]
+    private let trailsByID: [Trail.ID: Trail]
 
     public var trails: [Trail] {
         entries.map(\.trail)
@@ -19,6 +20,11 @@ public struct TrailIndex: Sendable {
         entries = trails.map { trail in
             Entry(trail: trail, name: Self.normalize(trail.name), region: Self.normalize(trail.region))
         }
+        trailsByID = Dictionary(trails.map { ($0.id, $0) }) { first, _ in first }
+    }
+
+    public func trail(withID id: Trail.ID) -> Trail? {
+        trailsByID[id]
     }
 
     public func search(_ query: String) throws(CancellationError) -> [Trail] {

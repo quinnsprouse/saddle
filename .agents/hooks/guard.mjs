@@ -2,8 +2,8 @@ import { existsSync, readFileSync } from "node:fs";
 import { isAbsolute, relative, resolve } from "node:path";
 import { root } from "../../scripts/lib.mjs";
 
-const testHomes = /^(?:Packages\/[^/]+\/Tests\/|Tools\/Tests\/|App\/UITests\/|App\/PerformanceTests\/|App\/TestSupport\/)/;
-const docHomes = /^(?:docs\/agents\/|\.scratch\/|\.github\/|\.agents\/skills\/)/;
+const testHomes = /^(?:Tools\/Tests\/|App\/UITests\/|App\/PerformanceTests\/|App\/TestSupport\/)/;
+const docHomes = /^(?:docs\/agents\/|\.scratch\/|\.github\/)/;
 const checkFiles = [
   /(?:^|\/)\.swiftlint\.yml$/,
   /^\.swift-format$/,
@@ -12,7 +12,7 @@ const checkFiles = [
   /^mise\.toml$/,
   /^toolchain\.json$/,
   /^Tuist\/ProjectDescriptionHelpers\/BuildSettings\.swift$/,
-  /^scripts\/(?:verify|contract|doctor|lib|test-hooks)\.mjs$/,
+  /^scripts\/(?:verify|contract|doctor|lib|test-hooks|comments)\.mjs$/,
   /^Tools\/Sources\//,
   /^\.githooks\//,
   /^\.agents\/hooks\//,
@@ -74,6 +74,9 @@ function editDecision({ path, content }) {
   if (/(?:^|\/)(?:\.build|\.swiftpm|Derived|DerivedData)\/|\.xcodeproj(?:\/|$)|\.xcworkspace(?:\/|$)|^\.git\//.test(path)) {
     return ["deny", `${path} is generated. Change Project.swift or Tuist/ProjectDescriptionHelpers, then run mise run generate.`];
   }
+  if (/^\.(?:agents|claude)\/skills\/|^skills-lock\.json$/.test(path)) {
+    return ["deny", "Vendored skills change only through the skills CLI: mise run update:skills, or npx skills add."];
+  }
   if (/(?:^|\/)Package\.resolved$/.test(path)) {
     return ["deny", "Package.resolved belongs to SwiftPM. Change the exact version in Package.swift and run swift package resolve."];
   }
@@ -84,7 +87,7 @@ function editDecision({ path, content }) {
   if (isNew && path.endsWith(".swift") && looksLikeTest && !testHomes.test(path)) {
     return [
       "deny",
-      "Behavior tests live in a package's Tests/ directory and use only the public API. UI journeys live in App/UITests/.",
+      "App code has no unit tests. Verify behavior end to end with a journey in App/UITests/.",
     ];
   }
   if (checkFiles.some((pattern) => pattern.test(path))) {

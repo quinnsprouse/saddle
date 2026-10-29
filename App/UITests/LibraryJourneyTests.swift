@@ -17,6 +17,16 @@ final class LibraryJourneyTests: XCTestCase {
         XCTAssertEqual(app.firstTrail.label, firstUnfiltered)
     }
 
+    func testACorruptFavoritesFileShowsTheFailureState() throws {
+        let dataDirectory = FileManager.default.temporaryDirectory
+            .appending(path: UUID().uuidString, directoryHint: .isDirectory)
+        try FileManager.default.createDirectory(at: dataDirectory, withIntermediateDirectories: true)
+        try Data("not json".utf8).write(to: dataDirectory.appending(path: "favorites.json"))
+        let app = XCUIApplication.isolated(dataDirectory: dataDirectory)
+        app.launch()
+        XCTAssertTrue(app.staticTexts["Trails unavailable"].waitForExistence(timeout: 15))
+    }
+
     func testFavoriteSurvivesRelaunch() {
         let dataDirectory = FileManager.default.temporaryDirectory
             .appending(path: UUID().uuidString, directoryHint: .isDirectory)

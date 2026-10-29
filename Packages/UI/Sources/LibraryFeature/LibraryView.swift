@@ -3,19 +3,23 @@ public import SwiftUI
 
 public struct LibraryView: View {
     @Bindable private var model: LibraryModel
+    @State private var selection: Trail.ID?
 
     public init(model: LibraryModel) {
         self.model = model
     }
 
     public var body: some View {
-        NavigationStack {
+        NavigationSplitView {
             content
                 .navigationTitle(Text("Trails", bundle: .module))
-                .navigationDestination(for: Trail.self) { trail in
-                    TrailDetailView(trail: trail, model: model)
-                }
                 .searchable(text: $model.query, prompt: Text("Search trails", bundle: .module))
+        } detail: {
+            if let trail = model.trail(withID: selection) {
+                TrailDetailView(trail: trail, model: model)
+            } else {
+                ContentUnavailableView(String(localized: "Choose a trail", bundle: .module), systemImage: "map")
+            }
         }
         .task { await model.load() }
         .task(id: model.query) { await model.search() }
@@ -34,8 +38,8 @@ public struct LibraryView: View {
         case .ready where model.results.isEmpty:
             ContentUnavailableView.search(text: model.query)
         case .ready:
-            List(model.results) { trail in
-                NavigationLink(value: trail) {
+            List(model.results, selection: $selection) { trail in
+                NavigationLink(value: trail.id) {
                     TrailRow(trail: trail, isFavorite: model.isFavorite(trail))
                 }
             }

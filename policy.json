@@ -14,6 +14,11 @@
       "why": "Services and the composition root own the outside world, and tests and tools create temporary files."
     },
     {
+      "rule": "unit-test",
+      "paths": ["App/UITests/", "App/PerformanceTests/", "App/TestSupport/", "Tools/Tests/"],
+      "why": "Journeys, performance runs, and guardrail tests drive real binaries instead of unit-testing app code."
+    },
+    {
       "rule": "print",
       "paths": ["Tools/Sources/policy/"],
       "why": "The policy command reports its violations on standard output for scripts and agents."

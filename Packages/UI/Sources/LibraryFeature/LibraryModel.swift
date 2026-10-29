@@ -56,6 +56,10 @@ public final class LibraryModel {
         }
     }
 
+    public func trail(withID id: Trail.ID?) -> Trail? {
+        id.flatMap(index.trail(withID:))
+    }
+
     public func isFavorite(_ trail: Trail) -> Bool {
         favorites.contains(trail.id)
     }
